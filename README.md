@@ -1,4 +1,9 @@
-# 🚀 react-native-bootsplash
+# Guilded
+
+Forked and patched to add support for layout files on android
+See: https://github.com/zoontek/react-native-bootsplash/issues/112#issuecomment-676495403
+
+## 🚀 react-native-bootsplash
 
 <a href="https://github.com/sponsors/zoontek">
   <img align="right" width="160" alt="This library helped you? Consider sponsoring!" src=".github/funding-octocat.svg">

@@ -3,6 +3,7 @@ package com.zoontek.rnbootsplash;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
@@ -39,6 +40,7 @@ public class RNBootSplashModule extends ReactContextBaseJavaModule implements Li
   }
 
   private static int mDrawableResId = -1;
+  private static int mLayoutResId = -1;
   private static final ArrayList<RNBootSplashTask> mTaskQueue = new ArrayList<>();
   private static Status mStatus = Status.HIDDEN;
   private static boolean mIsAppInBackground = false;
@@ -53,16 +55,19 @@ public class RNBootSplashModule extends ReactContextBaseJavaModule implements Li
     return MODULE_NAME;
   }
 
-  private static LinearLayout getLayout(@NonNull Activity activity, LayoutParams params) {
-    LinearLayout layout = new LinearLayout(activity);
-    View view = new View(activity);
-
-    view.setBackgroundResource(mDrawableResId);
+  private static ViewGroup getLayout(@NonNull Activity activity, LayoutParams params) {
+    ViewGroup layout;
+    if (mDrawableResId != -1) {
+      layout = new LinearLayout(activity);
+      View view = new View(activity);
+      view.setBackgroundResource(mDrawableResId);
+      ((LinearLayout)layout).setOrientation(LinearLayout.VERTICAL);
+      layout.addView(view, params);
+    } else {
+      layout = (ViewGroup) LayoutInflater.from(activity).inflate(mLayoutResId, null, false);
+    }
     layout.setId(R.id.bootsplash_layout_id);
     layout.setLayoutTransition(null);
-    layout.setOrientation(LinearLayout.VERTICAL);
-    layout.addView(view, params);
-
     return layout;
   }
 
@@ -86,6 +91,21 @@ public class RNBootSplashModule extends ReactContextBaseJavaModule implements Li
     });
   }
 
+  public static void initLayout(int layoutResId, final Activity activity) {
+    mLayoutResId = layoutResId;
+    UiThreadUtil.runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        if (activity == null || activity.isFinishing() || activity.findViewById(R.id.bootsplash_layout_id) != null) {
+          return;
+        }
+        LayoutParams params = new LayoutParams(
+        LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+        activity.addContentView(getLayout(activity, params), params);
+      }
+    });
+  }
+
   @Override
   public void onHostDestroy() {
     mIsAppInBackground = true;
@@ -103,7 +123,7 @@ public class RNBootSplashModule extends ReactContextBaseJavaModule implements Li
   }
 
   private void shiftNextTask() {
-    boolean shouldSkipTick = mDrawableResId == -1
+    boolean shouldSkipTick = (mDrawableResId == -1 && mLayoutResId == -1)
       || mStatus == Status.TRANSITIONING_TO_VISIBLE
       || mStatus == Status.TRANSITIONING_TO_HIDDEN
       || mIsAppInBackground
@@ -157,7 +177,7 @@ public class RNBootSplashModule extends ReactContextBaseJavaModule implements Li
 
         LayoutParams params = new LayoutParams(
           LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-        LinearLayout layout = getLayout(activity, params);
+        ViewGroup layout = getLayout(activity, params);
 
         if (task.getFade()) {
           layout.setAlpha(0.0f);
@@ -243,7 +263,7 @@ public class RNBootSplashModule extends ReactContextBaseJavaModule implements Li
 
   @ReactMethod
   public void show(final boolean fade, final Promise promise) {
-    if (mDrawableResId == -1) {
+    if (mDrawableResId == -1 && mLayoutResId == -1) {
       promise.reject("uninitialized_module", "react-native-bootsplash has not been initialized");
     } else {
       mTaskQueue.add(new RNBootSplashTask(RNBootSplashTask.Type.SHOW, fade, promise));
@@ -253,7 +273,7 @@ public class RNBootSplashModule extends ReactContextBaseJavaModule implements Li
 
   @ReactMethod
   public void hide(final boolean fade, final Promise promise) {
-    if (mDrawableResId == -1) {
+    if (mDrawableResId == -1 && mLayoutResId == -1) {
       promise.reject("uninitialized_module", "react-native-bootsplash has not been initialized");
     } else {
       mTaskQueue.add(new RNBootSplashTask(RNBootSplashTask.Type.HIDE, fade, promise));

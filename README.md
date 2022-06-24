@@ -2,6 +2,7 @@
 
 Forked and patched to add support for layout files on android
 See: https://github.com/zoontek/react-native-bootsplash/issues/112#issuecomment-676495403
+then modified to support ConstraintLayout
 
 ## 🚀 react-native-bootsplash
 

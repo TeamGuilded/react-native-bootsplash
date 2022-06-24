@@ -8,8 +8,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
@@ -58,10 +58,9 @@ public class RNBootSplashModule extends ReactContextBaseJavaModule implements Li
   private static ViewGroup getLayout(@NonNull Activity activity, LayoutParams params) {
     ViewGroup layout;
     if (mDrawableResId != -1) {
-      layout = new LinearLayout(activity);
+      layout = new ConstraintLayout(activity);
       View view = new View(activity);
       view.setBackgroundResource(mDrawableResId);
-      ((LinearLayout)layout).setOrientation(LinearLayout.VERTICAL);
       layout.addView(view, params);
     } else {
       layout = (ViewGroup) LayoutInflater.from(activity).inflate(mLayoutResId, null, false);
@@ -220,7 +219,7 @@ public class RNBootSplashModule extends ReactContextBaseJavaModule implements Li
           return;
         }
 
-        final LinearLayout layout = activity.findViewById(R.id.bootsplash_layout_id);
+        final ConstraintLayout layout = activity.findViewById(R.id.bootsplash_layout_id);
 
         if (layout == null) {
           promise.resolve(true); // splash screen is already hidden

@@ -35,7 +35,7 @@ local.properties
 
 # node.js
 #
-node_modules/
+node_modules/*
 npm-debug.log
 yarn-error.log
 
@@ -71,3 +71,11 @@ dist/
 **/lib/ocaml
 *.bs.js
 .bsb.lock
+
+
+# White list Guilded CI build deps
+!node_modules/@jimp/
+!node_modules/parse-bmfont-xml/
+!node_modules/pixelmatch/
+!node_modules/exif-parser/
+!node_modules/xmlbuilder/
